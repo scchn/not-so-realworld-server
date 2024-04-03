@@ -67,10 +67,19 @@ async fn create_user(
     .fetch_one(&state.db)
     .await
     .on_constraint("users_username_key", |_| {
-        ApiError::unprocessable_entity([("Username", "帳號已存在。")])
+        ApiError::unprocessable_entity([("username", "帳號已存在。")])
     })
     .on_constraint("users_email_key", |_| {
-        ApiError::unprocessable_entity([("Email", "信箱已存在。")])
+        ApiError::unprocessable_entity([("email", "信箱已存在。")])
+    })
+    .on_constraint("users_username_check", |_| {
+        ApiError::unprocessable_entity([("username", "帳號不可為空。")])
+    })
+    .on_constraint("users_email_check", |_| {
+        ApiError::unprocessable_entity([("email", "信箱不可為空。")])
+    })
+    .on_constraint("users_password_hash_check", |_| {
+        ApiError::unprocessable_entity([("password", "密碼不可為空。")])
     })?;
 
     let token = AuthUser(user_id).to_jwt(&state.config);
@@ -169,10 +178,19 @@ async fn update_user(
     .fetch_one(&state.db)
     .await
     .on_constraint("users_username_key", |_| {
-        ApiError::unprocessable_entity([("Username", "帳號已存在。")])
+        ApiError::unprocessable_entity([("username", "帳號已存在。")])
     })
     .on_constraint("users_email_key", |_| {
-        ApiError::unprocessable_entity([("Email", "信箱已存在。")])
+        ApiError::unprocessable_entity([("email", "信箱已存在。")])
+    })
+    .on_constraint("users_username_check", |_| {
+        ApiError::unprocessable_entity([("username", "帳號不可為空。")])
+    })
+    .on_constraint("users_email_check", |_| {
+        ApiError::unprocessable_entity([("email", "信箱不可為空。")])
+    })
+    .on_constraint("users_password_hash_check", |_| {
+        ApiError::unprocessable_entity([("password", "密碼不可為空。")])
     })?;
 
     let user = User {
