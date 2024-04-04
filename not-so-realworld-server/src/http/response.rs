@@ -14,16 +14,16 @@ pub enum ApiError {
     #[error(transparent)]
     Anyhow(#[from] anyhow::Error),
 
-    #[error("認證失敗")]
+    #[error("Unauthorized")]
     Unauthorized,
 
-    #[error("資料庫錯誤")]
+    #[error("DB Error")]
     SQLx(#[from] sqlx::Error),
 
-    #[error("資料有誤")]
+    #[error("Unprocessable Entity")]
     UnprocessableEntity(HashMap<Cow<'static, str>, Vec<Cow<'static, str>>>),
 
-    #[error("JSON 格式錯誤")]
+    #[error("Invalid JSON format")]
     JsonExtractorRejection(#[from] JsonRejection),
 
     #[error("Custom Error")]

@@ -24,7 +24,7 @@ pub struct User {
     token: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct NewUser {
     email: String,
     username: String,
@@ -67,19 +67,19 @@ async fn create_user(
     .fetch_one(&state.db)
     .await
     .on_constraint("users_username_key", |_| {
-        ApiError::unprocessable_entity([("username", "帳號已存在。")])
+        ApiError::unprocessable_entity([("username", "The username already exists.")])
     })
     .on_constraint("users_email_key", |_| {
-        ApiError::unprocessable_entity([("email", "信箱已存在。")])
+        ApiError::unprocessable_entity([("email", "The email already exists.")])
     })
     .on_constraint("users_username_check", |_| {
-        ApiError::unprocessable_entity([("username", "帳號不可為空。")])
+        ApiError::unprocessable_entity([("username", "Username mutst not be empty.")])
     })
     .on_constraint("users_email_check", |_| {
-        ApiError::unprocessable_entity([("email", "信箱不可為空。")])
+        ApiError::unprocessable_entity([("email", "Email mutst not be empty.")])
     })
     .on_constraint("users_password_hash_check", |_| {
-        ApiError::unprocessable_entity([("password", "密碼不可為空。")])
+        ApiError::unprocessable_entity([("password", "Password mutst not be empty.")])
     })?;
 
     let token = AuthUser(user_id).to_jwt(&state.config);
@@ -89,7 +89,7 @@ async fn create_user(
         token,
     };
 
-    Ok(ApiResponse::new_with_message("註冊成功", user))
+    Ok(ApiResponse::new_with_message("OK", user))
 }
 
 async fn login_user(
@@ -104,14 +104,18 @@ async fn login_user(
     .await?
     .ok_or(ApiError::custom(
         StatusCode::UNAUTHORIZED,
-        "登入失敗",
-        "帳號或密碼不正確。",
+        "Error",
+        "Incorrect username or password.",
     ))?;
 
     verify_password(req_user.password, user.password_hash)
         .await
         .map_err(|_| {
-            ApiError::custom(StatusCode::UNAUTHORIZED, "登入失敗", "帳號或密碼不正確。")
+            ApiError::custom(
+                StatusCode::UNAUTHORIZED,
+                "Error",
+                "Incorrect username or password.",
+            )
         })?;
 
     let token = AuthUser(user.user_id).to_jwt(&state.config);
@@ -121,7 +125,7 @@ async fn login_user(
         token,
     };
 
-    Ok(ApiResponse::new_with_message("登入成功", user))
+    Ok(ApiResponse::new_with_message("OK", user))
 }
 
 async fn get_current_user(
@@ -178,19 +182,19 @@ async fn update_user(
     .fetch_one(&state.db)
     .await
     .on_constraint("users_username_key", |_| {
-        ApiError::unprocessable_entity([("username", "帳號已存在。")])
+        ApiError::unprocessable_entity([("username", "The username already exists.")])
     })
     .on_constraint("users_email_key", |_| {
-        ApiError::unprocessable_entity([("email", "信箱已存在。")])
+        ApiError::unprocessable_entity([("email", "The email already exists.")])
     })
     .on_constraint("users_username_check", |_| {
-        ApiError::unprocessable_entity([("username", "帳號不可為空。")])
+        ApiError::unprocessable_entity([("username", "Username mutst not be empty.")])
     })
     .on_constraint("users_email_check", |_| {
-        ApiError::unprocessable_entity([("email", "信箱不可為空。")])
+        ApiError::unprocessable_entity([("email", "Email mutst not be empty.")])
     })
     .on_constraint("users_password_hash_check", |_| {
-        ApiError::unprocessable_entity([("password", "密碼不可為空。")])
+        ApiError::unprocessable_entity([("password", "Password mutst not be empty.")])
     })?;
 
     let user = User {
@@ -199,7 +203,7 @@ async fn update_user(
         token,
     };
 
-    Ok(ApiResponse::new_with_message("更新成功", user))
+    Ok(ApiResponse::new_with_message("OK", user))
 }
 
 async fn hash_password(password: String) -> Result<String> {
