@@ -4,7 +4,6 @@ use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::config::Config;
 
@@ -31,14 +30,6 @@ impl FromRef<AppState> for Config {
 }
 
 pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "example_websockets=debug,tower_http=debug".into()),
-        )
-        .with(tracing_subscriber::fmt::layer())
-        .init();
-
     let trace_layer = TraceLayer::new_for_http()
         .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
         .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
