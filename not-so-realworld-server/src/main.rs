@@ -6,17 +6,21 @@ mod config;
 mod http;
 
 use config::Config;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{fmt::Layer, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv()?;
 
+    let filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| "not_so_realworld_server=DEBUG,tower_http=DEBUG".into());
+    let file_appender = tracing_appender::rolling::never("logs", "example.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+    let non_blocking_layer = Layer::new().with_writer(non_blocking).with_ansi(false);
+
     tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "not_so_realworld_server=debug,tower_http=debug".into()),
-        )
+        .with(filter)
+        .with(non_blocking_layer)
         .with(tracing_subscriber::fmt::layer())
         .init();
 
